@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:transparent_image/transparent_image.dart';
 
 void main() => runApp(MyApp());
 
@@ -114,7 +115,16 @@ class _MyHomePageState extends State<MyHomePage> {
             } else {
               return Card(
                 child: Container(
-                  child: Image.network(dogs[index]),
+                  child: Stack(
+                    children: <Widget>[
+                      Center(child: FadeInImage.memoryNetwork(
+                        height: 300,
+                        placeholder: kTransparentImage,
+                        image: dogs[index],
+                      ),),
+                    ],
+                  ),
+                  // child: Image.network(dogs[index]),
                 ),
               );
             }
