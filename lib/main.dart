@@ -38,7 +38,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future getData() async {
     if (!isPerformingRequest) {
-      isPerformingRequest = true;
+      setState(() => isPerformingRequest = true);
       http.Response response =
           await http.get('https://dog.ceo/api/breeds/image/random/5');
       data = json.decode(response.body);
@@ -46,7 +46,7 @@ class _MyHomePageState extends State<MyHomePage> {
           data['message']); // TODO: find a cleaner solution.
       setState(() {
         dogs.addAll(newDogs);
-        isPerformingRequest = false;
+        setState(() => isPerformingRequest = false);
       });
     }
   }
@@ -115,16 +115,16 @@ class _MyHomePageState extends State<MyHomePage> {
             } else {
               return Card(
                 child: Container(
-                  child: Stack(
-                    children: <Widget>[
-                      Center(child: FadeInImage.memoryNetwork(
-                        height: 300,
-                        placeholder: kTransparentImage,
-                        image: dogs[index],
-                      ),),
-                    ],
+                  child: Center(
+                    child: FadeInImage.memoryNetwork(
+                      height: 300,
+                      placeholder: kTransparentImage,
+                      image: dogs[index],
+                      fit: BoxFit.contain,
+                      fadeInDuration: const Duration(milliseconds: 250),
+                      imageScale: 1.3,
+                    ),
                   ),
-                  // child: Image.network(dogs[index]),
                 ),
               );
             }
@@ -139,8 +139,8 @@ class _MyHomePageState extends State<MyHomePage> {
       padding: const EdgeInsets.all(8.0), // 8px padding
       child: Center(
         child: Opacity(
-          // opacity: isPerformingRequest ? 1.0 : 0.0,
-          opacity: 1,
+          opacity: isPerformingRequest ? 1.0 : 0.0,
+          // opacity: 1,
           child: CircularProgressIndicator(),
         ),
       ),
