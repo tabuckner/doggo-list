@@ -57,9 +57,10 @@ class _MyHomePageState extends State<MyHomePage> {
     getData();
 
     _scrollController.addListener(() {
-      bool atBottom = _scrollController.position.pixels ==
+      bool _atBottom = _scrollController.position.pixels ==
           _scrollController.position.maxScrollExtent;
-      if (atBottom) {
+      bool _hasValues = dogs != null && dogs.length > 0;
+      if (_atBottom && _hasValues) {
         getData();
       }
     });
