@@ -11,11 +11,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Doggo List',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(title: 'ListView'),
+      home: MyHomePage(title: 'An Doggo List'),
     );
   }
 }
@@ -33,22 +33,34 @@ class _MyHomePageState extends State<MyHomePage> {
   Map data;
   List dogs = new List();
   ScrollController _scrollController = new ScrollController();
+  bool isPerformingRequest = false;
 
   Future getData() async {
-    http.Response response =
-        await http.get('https://dog.ceo/api/breeds/image/random/5');
-    data = json.decode(response.body);
-    List<String> newDogs = new List<String>.from(
-        data['message']); // TODO: find a cleaner solution.
-    setState(() {
-      dogs.addAll(newDogs);
-    });
+    if (!isPerformingRequest) {
+      isPerformingRequest = true;
+      http.Response response =
+          await http.get('https://dog.ceo/api/breeds/image/random/5');
+      data = json.decode(response.body);
+      List<String> newDogs = new List<String>.from(
+          data['message']); // TODO: find a cleaner solution.
+      setState(() {
+        dogs.addAll(newDogs);
+        isPerformingRequest = false;
+      });
+    }
   }
 
   Future _handleRefresh() async {
-    dogs = new List();
+    dogs =
+        new List(); // TODO: Is this the best way to go? Is there garbage collection?
     await getData();
     return null;
+  }
+
+  void _handleClearList() {
+    setState(() {
+      dogs.clear();
+    });
   }
 
   @override
@@ -78,21 +90,14 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: Text(widget.title), // From MyHomePage (widget)
         centerTitle: true,
-        leading: Text((dogs.length.toString() ?? null) + ' Dogs'),
+        leading: IconButton(
+          icon: Icon(Icons.clear),
+          onPressed: _handleClearList,
+        ),
         actions: <Widget>[
           IconButton(
-            icon: Icon(Icons.clear),
-            onPressed: () {
-              setState(() {
-                dogs.clear();
-              });
-            },
-          ),
-          IconButton(
             icon: Icon(Icons.refresh),
-            onPressed: () {
-              _handleRefresh();
-            },
+            onPressed: _handleRefresh,
           ),
         ],
       ),
@@ -103,12 +108,30 @@ class _MyHomePageState extends State<MyHomePage> {
               ? 0
               : dogs.length, // Nice, ternary supported in flutter
           itemBuilder: (BuildContext context, int index) {
-            return Card(
-              child: Container(
-                child: Image.network(dogs[index]),
-              ),
-            );
+            if (index == dogs.length - 1) {
+              // Hrm, this is interesting.
+              return _buildProgressIndicator();
+            } else {
+              return Card(
+                child: Container(
+                  child: Image.network(dogs[index]),
+                ),
+              );
+            }
           },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildProgressIndicator() {
+    return new Padding(
+      padding: const EdgeInsets.all(8.0), // 8px padding
+      child: Center(
+        child: Opacity(
+          // opacity: isPerformingRequest ? 1.0 : 0.0,
+          opacity: 1,
+          child: CircularProgressIndicator(),
         ),
       ),
     );
